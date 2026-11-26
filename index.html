@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техно-Эксперт — Обзоры, статьи и инструменты</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header id="site-header"></header>
+
+    <main>
+        <section class="hero">
+            <h1>Добро пожаловать в Техно-Эксперт</h1>
+            <p>Понятные инструкции по выбору, настройке и самостоятельному ремонту вашей домашней электроники.</p>
+        </section>
+
+        <h2>Разделы сайта</h2>
+        <div class="grid">
+            <div class="card">
+                <div>
+                    <h3>📺 Телевизоры</h3>
+                    <p>Сравнение матриц, правильная калибровка изображения и калькулятор диагонали экрана.</p>
+                </div>
+                <a href="tv.html" class="btn">Перейти в раздел</a>
+            </div>
+            <div class="card">
+                <div>
+                    <h3>💻 Компьютеры</h3>
+                    <p>Сборка ПК, обслуживание комплектующих и расчет мощности блока питания.</p>
+                </div>
+                <a href="pc.html" class="btn">Перейти в раздел</a>
+            </div>
+            <div class="card">
+                <div>
+                    <h3>📱 Смартфоны</h3>
+                    <p>Уход за аккумулятором, защита глаз от мерцания экрана и калькулятор зарядки.</p>
+                </div>
+                <a href="phones.html" class="btn">Перейти в раздел</a>
+            </div>
+            <div class="card">
+                <div>
+                    <h3>🛠️ Решение проблем</h3>
+                    <p>Интерактивный мастер диагностики неисправностей: найдите причину поломки за 1 минуту.</p>
+                </div>
+                <a href="troubleshooting.html" class="btn">Запустить помощник</a>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 3rem;">База знаний и статьи</h2>
+
+        <div class="controls-panel">
+            <input type="text" id="article-search" class="search-input"
+                placeholder="🔍 Поиск по статьям (например: OLED, термопаста, батарея, SSD)..."
+                oninput="applyFilters()">
+
+            <div class="filter-pills" id="category-filters">
+                <button class="filter-btn active" onclick="setCategory('all', this)">Все статьи</button>
+                <button class="filter-btn" onclick="setCategory('tv', this)">📺 Телевизоры</button>
+                <button class="filter-btn" onclick="setCategory('pc', this)">💻 Компьютеры</button>
+                <button class="filter-btn" onclick="setCategory('phones', this)">📱 Смартфоны</button>
+                <button class="filter-btn" onclick="setCategory('favorites', this)">❤️ Избранное</button>
+            </div>
+        </div>
+
+        <div id="latest-articles" class="grid"></div>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="data.js"></script>
+    <script>
+        let currentCategory = "all";
+
+        function setCategory(category, btnElement) {
+            currentCategory = category;
+            document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+            btnElement.classList.add("active");
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById("article-search").value;
+            renderArticles("latest-articles", currentCategory, query);
+        }
+
+        // Первичная отрисовка
+        applyFilters();
+    </script>
+</body>
+
+</html>

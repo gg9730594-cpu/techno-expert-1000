@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Смартфоны — Техно-Эксперт</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header id="site-header"></header>
+
+    <main>
+        <h1>📱 Смартфоны и гаджеты</h1>
+        <p style="color: var(--text-muted);">Настройка экранов, продление жизни аккумулятора и полезные расчеты.</p>
+
+        <section class="tool-box">
+            <h2>⚡ Калькулятор времени зарядки смартфона</h2>
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">Рассчитайте примерное время зарядки с 0% до 100% с
+                учетом замедления после 80%.</p>
+
+            <div class="form-group">
+                <label for="battery-mah">Емкость аккумулятора (мА·ч):</label>
+                <input type="number" id="battery-mah" value="5000" min="1000" max="20000" step="100">
+            </div>
+            <div class="form-group">
+                <label for="charger-watt">Мощность зарядного блока (Вт):</label>
+                <select id="charger-watt">
+                    <option value="10">10 Вт (Стандартный старый блок)</option>
+                    <option value="20" selected>20 Вт (Быстрая зарядка iPhone / базовый Android)</option>
+                    <option value="33">33 Вт (Средний класс)</option>
+                    <option value="67">67 Вт (Быстрая зарядка)</option>
+                    <option value="120">120 Вт (Ультрабыстрая зарядка)</option>
+                </select>
+            </div>
+            <button class="btn" onclick="calculateChargeTime()">Рассчитать время</button>
+
+            <div id="charge-result" class="result-box"></div>
+        </section>
+
+        <h2>Статьи о смартфонах</h2>
+        <div id="phones-articles" class="grid"></div>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="data.js"></script>
+    <script>
+        renderArticles("phones-articles", "phones");
+
+        function calculateChargeTime() {
+            const mah = parseFloat(document.getElementById("battery-mah").value);
+            const watts = parseFloat(document.getElementById("charger-watt").value);
+            const resultBox = document.getElementById("charge-result");
+
+            if (!mah || mah < 500) {
+                alert("Введите корректную емкость батареи (от 500 мА·ч)");
+                return;
+            }
+
+            const wattHours = (mah * 3.85) / 1000;
+            const effectiveWatts = watts * 0.72;
+            const totalMinutes = Math.round((wattHours / effectiveWatts) * 60);
+
+            const hours = Math.floor(totalMinutes / 60);
+            const mins = totalMinutes % 60;
+            const timeFormatted = hours > 0 ? `${hours} ч ${mins} мин` : `${mins} мин`;
+
+            resultBox.style.display = "block";
+            resultBox.innerHTML = `
+                <strong>Примерное время полной зарядки:</strong> <b>~${timeFormatted}</b>.<br>
+                <span style="font-size: 0.9rem;">До 80% смартфон зарядится примерно за <b>${Math.round(totalMinutes * 0.65)} мин</b>.</span>
+            `;
+        }
+    </script>
+</body>
+
+</html>

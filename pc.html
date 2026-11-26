@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Компьютеры — Техно-Эксперт</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header id="site-header"></header>
+
+    <main>
+        <h1>💻 Компьютеры и комплектующие</h1>
+        <p style="color: var(--text-muted);">Сборка, апгрейд и обслуживание ПК.</p>
+
+        <section class="tool-box">
+            <h2>🔌 Калькулятор блока питания (БП)</h2>
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">Узнайте минимальную мощность БП с учетом запаса
+                30% для стабильной работы.</p>
+
+            <div class="form-group">
+                <label for="cpu-tdp">Уровень процессора:</label>
+                <select id="cpu-tdp">
+                    <option value="65">Офисный / Базовый (Core i3 / Ryzen 3 — 65 Вт)</option>
+                    <option value="125">Игровой средний (Core i5 / Ryzen 5 — 125 Вт)</option>
+                    <option value="250">Мощный / Рабочий (Core i7-i9 / Ryzen 7-9 — 250 Вт)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="gpu-tdp">Уровень видеокарты:</label>
+                <select id="gpu-tdp">
+                    <option value="0">Встроенная графика (без видеокарты)</option>
+                    <option value="150">Бюджетная игровая (RTX 4060 / RX 7600 — 150 Вт)</option>
+                    <option value="250">Предтоповая (RTX 4070 Super / RX 7800 XT — 250 Вт)</option>
+                    <option value="450">Флагманская (RTX 4090 / 5090 — 450 Вт)</option>
+                </select>
+            </div>
+            <button class="btn" onclick="calculatePSU()">Подобрать БП</button>
+
+            <div id="psu-result" class="result-box"></div>
+        </section>
+
+        <h2>Статьи о компьютерах</h2>
+        <div id="pc-articles" class="grid"></div>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="data.js"></script>
+    <script>
+        renderArticles("pc-articles", "pc");
+
+        function calculatePSU() {
+            const cpu = parseInt(document.getElementById("cpu-tdp").value);
+            const gpu = parseInt(document.getElementById("gpu-tdp").value);
+            const systemBase = 70;
+
+            const totalLoad = cpu + gpu + systemBase;
+            const recommended = Math.ceil((totalLoad * 1.3) / 50) * 50;
+
+            const resultBox = document.getElementById("psu-result");
+            resultBox.style.display = "block";
+            resultBox.innerHTML = `
+                Пиковое потребление системы: ~<b>${totalLoad} Вт</b>.<br>
+                <strong>Рекомендуемый блок питания:</strong> от <b>${recommended} Вт</b> (желательно с сертификатом 80+ Bronze или Gold).
+            `;
+        }
+    </script>
+</body>
+
+</html>

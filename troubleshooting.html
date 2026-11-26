@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Решение проблем — Техно-Эксперт</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header id="site-header"></header>
+
+    <main>
+        <h1>🛠️ Помощник решения проблем</h1>
+        <p style="color: var(--text-muted);">Выберите устройство и симптом, чтобы получить пошаговую инструкцию по
+            исправлению.</p>
+
+        <section class="tool-box">
+            <div class="form-group">
+                <label for="device-select">1. Что сломалось или работает неправильно?</label>
+                <select id="device-select" onchange="updateSymptoms()">
+                    <option value="">-- Выберите устройство --</option>
+                    <option value="pc">Компьютер / Ноутбук</option>
+                    <option value="tv">Телевизор</option>
+                    <option value="wifi">Интернет / Wi-Fi роутер</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="symptom-group" style="display: none;">
+                <label for="symptom-select">2. В чем заключается проблема?</label>
+                <select id="symptom-select" onchange="showSolution()"></select>
+            </div>
+
+            <div id="solution-box" class="result-box"></div>
+        </section>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="data.js"></script>
+    <script>
+        const PROBLEMS_DB = {
+            pc: {
+                "no-image": {
+                    title: "ПК включается, вентиляторы крутятся, но нет изображения",
+                    steps: [
+                        "Проверьте, вставлен ли кабель монитора в <b>видеокарту</b>, а не в разъём материнской платы.",
+                        "Вытащите планки оперативной памяти (ОЗУ), протрите контакты ластиком и вставьте плотно до щелчка.",
+                        "Отключите ПК от розетки и вытащите круглую батарейку CMOS на материнской плате на 2 минуты для сброса BIOS."
+                    ]
+                },
+                "slow-boot": {
+                    title: "Компьютер стал очень долго загружаться и тормозить",
+                    steps: [
+                        "Откройте Диспетчер задач (Ctrl + Shift + Esc) → вкладка «Автозагрузка» и отключите лишние программы.",
+                        "Проверьте свободное место на диске C: — должно быть свободно минимум 15 ГБ.",
+                        "Проверьте температуру процессора (например, программой HWMonitor) — возможно, высохла термопаста."
+                    ]
+                }
+            },
+            tv: {
+                "no-wifi": {
+                    title: "Телевизор не подключается к Wi-Fi или пишет «Без доступа к интернету»",
+                    steps: [
+                        "Зайдите в настройки даты и времени телевизора и включите «Автоматически» (из-за сбитой даты блокируется доступ в сеть).",
+                        "Отключите телевизор и роутер из розетки на 1 минуту, затем включите снова.",
+                        "Попробуйте подключить ТВ к частоте 2.4 ГГц вместо 5 ГГц, если роутер стоит далеко."
+                    ]
+                },
+                "sound-no-pic": {
+                    title: "Звук есть, каналы переключаются, но экран черный",
+                    steps: [
+                        "Посветите фонариком телефона вплотную к экрану. Если видно тусклое изображение — перегорела светодиодная подсветка.",
+                        "Отключите все HDMI-кабели и перезагрузите ТВ по питанию.",
+                        "Если проблема с подсветкой подтвердилась — требуется замена светодиодных линеек в сервисе."
+                    ]
+                }
+            },
+            wifi: {
+                "low-speed": {
+                    title: "Низкая скорость интернета по Wi-Fi",
+                    steps: [
+                        "Подключитесь к сети с пометкой <b>5G</b> (5 ГГц) — диапазон 2.4 ГГц сильно перегружен соседскими роутерами.",
+                        "Не ставьте роутер внутрь закрытых шкафов или за телевизор.",
+                        "Перезагрузите роутер, чтобы он автоматически выбрал менее загруженный радиоканал."
+                    ]
+                }
+            }
+        };
+
+        function updateSymptoms() {
+            const device = document.getElementById("device-select").value;
+            const symptomGroup = document.getElementById("symptom-group");
+            const symptomSelect = document.getElementById("symptom-select");
+            const solutionBox = document.getElementById("solution-box");
+
+            solutionBox.style.display = "none";
+
+            if (!device || !PROBLEMS_DB[device]) {
+                symptomGroup.style.display = "none";
+                return;
+            }
+
+            let options = '<option value="">-- Выберите проблему --</option>';
+            for (const [key, item] of Object.entries(PROBLEMS_DB[device])) {
+                options += `<option value="${key}">${item.title}</option>`;
+            }
+
+            symptomSelect.innerHTML = options;
+            symptomGroup.style.display = "block";
+        }
+
+        function showSolution() {
+            const device = document.getElementById("device-select").value;
+            const symptom = document.getElementById("symptom-select").value;
+            const solutionBox = document.getElementById("solution-box");
+
+            if (!symptom) {
+                solutionBox.style.display = "none";
+                return;
+            }
+
+            const data = PROBLEMS_DB[device][symptom];
+            const stepsHTML = data.steps.map((step, i) => `<p style="margin-top:0.5rem;"><b>Шаг ${i + 1}:</b> ${step}</p>`).join("");
+
+            solutionBox.style.display = "block";
+            solutionBox.innerHTML = `<h3>План действий:</h3>${stepsHTML}`;
+        }
+    </script>
+</body>
+
+</html>
