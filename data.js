@@ -1,12 +1,16 @@
 // 1. НАСТРОЙКА МЕНЮ
+// 1. НАСТРОЙКА МЕНЮ
 const MENU_ITEMS = [
     { title: "Главная", url: "index.html" },
     { title: "Телевизоры", url: "tv.html" },
     { title: "Компьютеры", url: "pc.html" },
     { title: "Смартфоны", url: "phones.html" },
     { title: "Тренажер печати", url: "typing.html" },
+    { title: "Симуляторы", url: "simulators.html" },
+    { title: "SVG → Код", url: "svg-editor.html" },
     { title: "Решение проблем", url: "troubleshooting.html" }
 ];
+
 
 // 2. БАЗА СТАТЕЙ
 const ARTICLES = [
