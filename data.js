@@ -1,5 +1,4 @@
 // 1. НАСТРОЙКА МЕНЮ
-// 1. НАСТРОЙКА МЕНЮ
 const MENU_ITEMS = [
     { title: "Главная", url: "index.html" },
     { title: "Телевизоры", url: "tv.html" },
@@ -7,7 +6,8 @@ const MENU_ITEMS = [
     { title: "Смартфоны", url: "phones.html" },
     { title: "Тренажер печати", url: "typing.html" },
     { title: "Симуляторы", url: "simulators.html" },
-    { title: "SVG → Код", url: "svg-editor.html" },
+    { title: "Эмулятор CPU", url: "emulator.html" },
+    { title: "Конструктор GUI", url: "svg-editor.html" },
     { title: "Решение проблем", url: "troubleshooting.html" }
 ];
 
