@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Техно-Эксперт — Обзоры, статьи и инструменты</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <header id="site-header"></header>
 
@@ -26,20 +24,31 @@
                 </div>
                 <a href="tv.html" class="btn">Перейти в раздел</a>
             </div>
+
             <div class="card">
                 <div>
                     <h3>💻 Компьютеры</h3>
-                    <p>Сборка ПК, обслуживание комплектующих и расчет мощности блока питания.</p>
+                    <p>Сборка ПК, тест монитора на битые пиксели и расчет мощности блока питания.</p>
                 </div>
                 <a href="pc.html" class="btn">Перейти в раздел</a>
             </div>
+
             <div class="card">
                 <div>
                     <h3>📱 Смартфоны</h3>
-                    <p>Уход за аккумулятором, защита глаз от мерцания экрана и калькулятор зарядки.</p>
+                    <p>Уход за аккумулятором, подбор объема памяти и калькулятор времени зарядки.</p>
                 </div>
                 <a href="phones.html" class="btn">Перейти в раздел</a>
             </div>
+
+            <div class="card">
+                <div>
+                    <h3>⌨️ Тренажер печати</h3>
+                    <p>Проверьте скорость и точность набора текста на русском, английском или языке кода.</p>
+                </div>
+                <a href="typing.html" class="btn">Начать тренировку</a>
+            </div>
+
             <div class="card">
                 <div>
                     <h3>🛠️ Решение проблем</h3>
@@ -50,12 +59,16 @@
         </div>
 
         <h2 style="margin-top: 3rem;">База знаний и статьи</h2>
-
+        
         <div class="controls-panel">
-            <input type="text" id="article-search" class="search-input"
+            <input 
+                type="text" 
+                id="article-search" 
+                class="search-input" 
                 placeholder="🔍 Поиск по статьям (например: OLED, термопаста, батарея, SSD)..."
-                oninput="applyFilters()">
-
+                oninput="applyFilters()"
+            >
+            
             <div class="filter-pills" id="category-filters">
                 <button class="filter-btn active" onclick="setCategory('all', this)">Все статьи</button>
                 <button class="filter-btn" onclick="setCategory('tv', this)">📺 Телевизоры</button>
@@ -86,9 +99,7 @@
             renderArticles("latest-articles", currentCategory, query);
         }
 
-        // Первичная отрисовка
         applyFilters();
     </script>
 </body>
-
 </html>
