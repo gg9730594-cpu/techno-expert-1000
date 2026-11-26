@@ -1,16 +1,14 @@
-// 1. НАСТРОЙКА МЕНЮ
+// 1. НАСТРОЙКА РАЗДЕЛОВ (Отображаются в выпадающем меню по кнопке в шапке)
 const MENU_ITEMS = [
-    { title: "Главная", url: "index.html" },
-    { title: "Телевизоры", url: "tv.html" },
-    { title: "Компьютеры", url: "pc.html" },
-    { title: "Смартфоны", url: "phones.html" },
-    { title: "Тренажер печати", url: "typing.html" },
-    { title: "Симуляторы", url: "simulators.html" },
-    { title: "Эмулятор CPU", url: "emulator.html" },
-    { title: "Конструктор GUI", url: "svg-editor.html" },
-    { title: "Решение проблем", url: "troubleshooting.html" }
+    { title: "📺 Телевизоры", url: "tv.html" },
+    { title: "💻 Компьютеры", url: "pc.html" },
+    { title: "📱 Смартфоны", url: "phones.html" },
+    { title: "⌨️ Тренажер печати", url: "typing.html" },
+    { title: "🕹️ SVG-Симуляторы", url: "simulators.html" },
+    { title: "🧠 Эмуляторы CPU", url: "emulator.html" },
+    { title: "🖥️ Конструктор GUI", url: "svg-editor.html" },
+    { title: "🛠️ Решение проблем", url: "troubleshooting.html" }
 ];
-
 
 // 2. БАЗА СТАТЕЙ
 const ARTICLES = [
@@ -98,7 +96,7 @@ const ARTICLES = [
     }
 ];
 
-// 3. УПРАВЛЕНИЕ ИЗБРАННЫМ (localStorage)
+// 3. УПРАВЛЕНИЕ ИЗБРАННЫМ
 function getFavorites() {
     return JSON.parse(localStorage.getItem("techno-favorites") || "[]");
 }
@@ -116,14 +114,12 @@ function toggleFavorite(articleId, btnElement = null) {
     }
     localStorage.setItem("techno-favorites", JSON.stringify(favs));
 
-    // Обновляем вид кнопки сразу, если она передана
     if (btnElement) {
         const saved = favs.includes(articleId);
         btnElement.classList.toggle("saved", saved);
         btnElement.innerHTML = saved ? "❤️ В избранном" : "🤍";
     }
 
-    // Если на главной сейчас открыт фильтр "Избранное", перерисовываем список
     if (typeof currentCategory !== "undefined" && currentCategory === "favorites") {
         applyFilters();
     }
@@ -150,7 +146,26 @@ function updateThemeButton() {
     btn.innerHTML = isDark ? "☀️ Светлая" : "🌙 Темная";
 }
 
-// 5. ИНИЦИАЛИЗАЦИЯ ШАПКИ И ПОДВАЛА
+// 5. УПРАВЛЕНИЕ ВЫПАДАЮЩИМИ СПИСКАМИ (Dropdown)
+function toggleDropdown(menuId, event) {
+    event.stopPropagation();
+    const target = document.getElementById(menuId);
+    const wasOpen = target.classList.contains("open");
+
+    // Закрываем все открытые выпадающие списки
+    document.querySelectorAll(".dropdown-menu").forEach(m => m.classList.remove("open"));
+
+    if (!wasOpen) {
+        target.classList.add("open");
+    }
+}
+
+// Закрытие при клике в любое место вне меню
+document.addEventListener("click", () => {
+    document.querySelectorAll(".dropdown-menu").forEach(m => m.classList.remove("open"));
+});
+
+// 6. ИНИЦИАЛИЗАЦИЯ ШАПКИ И ПОДВАЛА
 document.addEventListener("DOMContentLoaded", () => {
     renderHeader();
     renderFooter();
@@ -161,15 +176,29 @@ function renderHeader() {
     if (!header) return;
 
     const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const navLinks = MENU_ITEMS.map(item =>
-        `<li><a href="${item.url}" class="${currentPage === item.url ? 'active' : ''}">${item.title}</a></li>`
+    const activeItem = MENU_ITEMS.find(item => item.url === currentPage);
+    const dropdownTitle = activeItem ? activeItem.title : "📂 Разделы";
+
+    const menuLinks = MENU_ITEMS.map(item => 
+        `<a href="${item.url}" class="dropdown-item ${currentPage === item.url ? 'active' : ''}">${item.title}</a>`
     ).join("");
 
     header.innerHTML = `
         <div class="nav-container">
             <a href="index.html" class="logo">⚡ Техно-Эксперт</a>
             <div class="nav-right">
-                <nav><ul>${navLinks}</ul></nav>
+                <a href="index.html" class="nav-home-link ${currentPage === 'index.html' ? 'active' : ''}">Главная</a>
+
+                <div class="dropdown">
+                    <button class="dropdown-btn" onclick="toggleDropdown('nav-sections-menu', event)">
+                        <span>${dropdownTitle}</span>
+                        <span>▾</span>
+                    </button>
+                    <div id="nav-sections-menu" class="dropdown-menu">
+                        ${menuLinks}
+                    </div>
+                </div>
+
                 <button id="theme-btn" class="theme-toggle" onclick="toggleTheme()"></button>
             </div>
         </div>
@@ -183,7 +212,7 @@ function renderFooter() {
     footer.innerHTML = `<p>© ${new Date().getFullYear()} Техно-Эксперт — База знаний и инструменты для вашей техники.</p>`;
 }
 
-// 6. ОТРИСОВКА КАРТОЧЕК СТАТЕЙ (Поддерживает 'all', 'tv', 'pc', 'phones', 'favorites')
+// 7. ОТРИСОВКА КАРТОЧЕК СТАТЕЙ
 function renderArticles(containerId, category = "all", searchQuery = "") {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -197,8 +226,8 @@ function renderArticles(containerId, category = "all", searchQuery = "") {
         else if (category === "favorites") matchCategory = favs.includes(art.id);
         else matchCategory = art.category === category;
 
-        const matchSearch = !query ||
-            art.title.toLowerCase().includes(query) ||
+        const matchSearch = !query || 
+            art.title.toLowerCase().includes(query) || 
             art.summary.toLowerCase().includes(query) ||
             art.tag.toLowerCase().includes(query);
 
@@ -208,7 +237,7 @@ function renderArticles(containerId, category = "all", searchQuery = "") {
     if (filtered.length === 0) {
         const emptyMsg = category === "favorites" && !query
             ? "У вас пока нет сохраненных статей. Нажмите на сердечко на любой карточке, чтобы добавить её сюда."
-            : `По вашему запросу ничего не найдено.`;
+            : "По вашему запросу ничего не найдено.";
         container.innerHTML = `<p style="color: var(--text-muted); grid-column: 1 / -1;">${emptyMsg}</p>`;
         return;
     }
