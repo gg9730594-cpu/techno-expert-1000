@@ -20,7 +20,7 @@
             <div class="card">
                 <div>
                     <h3>📺 Телевизоры</h3>
-                    <p>Сравнение матриц, правильная калибровка изображения и калькулятор диагонали экрана.</p>
+                    <p>Сравнение матриц, калибровка изображения, расчет PPI и диагонали экрана.</p>
                 </div>
                 <a href="tv.html" class="btn">Перейти в раздел</a>
             </div>
@@ -28,7 +28,7 @@
             <div class="card">
                 <div>
                     <h3>💻 Компьютеры</h3>
-                    <p>Сборка ПК, тест монитора на битые пиксели и расчет мощности блока питания.</p>
+                    <p>Сборка ПК, тест монитора на битые пиксели, генератор паролей и калькулятор БП.</p>
                 </div>
                 <a href="pc.html" class="btn">Перейти в раздел</a>
             </div>
@@ -52,9 +52,25 @@
             <div class="card">
                 <div>
                     <h3>🕹️ SVG-Симуляторы</h3>
-                    <p>Интерактивный ретро-телевизор, рабочий стол Windows XP и терминал MS-DOS.</p>
+                    <p>Ретро-телевизор, рабочий стол Windows XP, MS-DOS и Nokia 3310 со змейкой.</p>
                 </div>
                 <a href="simulators.html" class="btn">Открыть симуляторы</a>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h3>🧠 Эмуляторы CPU</h3>
+                    <p>Потактовый 8-битный процессор SAP-1 с шиной данных и консоль CHIP-8 (1977).</p>
+                </div>
+                <a href="emulator.html" class="btn">Запустить эмуляторы</a>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h3>🖥️ Конструктор GUI</h3>
+                    <p>Визуальный редактор окон с логикой ЕСЛИ-ТОГДА и генерацией кода на C++, Python, Pascal.</p>
+                </div>
+                <a href="svg-editor.html" class="btn">Открыть редактор</a>
             </div>
 
             <div class="card">
@@ -69,6 +85,22 @@
         <h2 style="margin-top: 3rem;">База знаний и статьи</h2>
         
         <div class="controls-panel">
+            <!-- Выпадающий список категорий по кнопке -->
+            <div class="dropdown">
+                <button class="dropdown-btn" style="padding: 0.85rem 1.1rem;" onclick="toggleDropdown('cat-filter-menu', event)">
+                    <span id="cat-btn-label">🏷️ Все статьи</span>
+                    <span>▾</span>
+                </button>
+                <div id="cat-filter-menu" class="dropdown-menu left-align">
+                    <button class="dropdown-item active" onclick="selectCategory('all', '🏷️ Все статьи', this)">🏷️ Все статьи</button>
+                    <button class="dropdown-item" onclick="selectCategory('tv', '📺 Телевизоры', this)">📺 Телевизоры</button>
+                    <button class="dropdown-item" onclick="selectCategory('pc', '💻 Компьютеры', this)">💻 Компьютеры</button>
+                    <button class="dropdown-item" onclick="selectCategory('phones', '📱 Смартфоны', this)">📱 Смартфоны</button>
+                    <button class="dropdown-item" onclick="selectCategory('favorites', '❤️ Избранное', this)">❤️ Избранное</button>
+                </div>
+            </div>
+
+            <!-- Строка живого поиска -->
             <input 
                 type="text" 
                 id="article-search" 
@@ -76,14 +108,6 @@
                 placeholder="🔍 Поиск по статьям (например: OLED, термопаста, батарея, SSD)..."
                 oninput="applyFilters()"
             >
-            
-            <div class="filter-pills" id="category-filters">
-                <button class="filter-btn active" onclick="setCategory('all', this)">Все статьи</button>
-                <button class="filter-btn" onclick="setCategory('tv', this)">📺 Телевизоры</button>
-                <button class="filter-btn" onclick="setCategory('pc', this)">💻 Компьютеры</button>
-                <button class="filter-btn" onclick="setCategory('phones', this)">📱 Смартфоны</button>
-                <button class="filter-btn" onclick="setCategory('favorites', this)">❤️ Избранное</button>
-            </div>
         </div>
 
         <div id="latest-articles" class="grid"></div>
@@ -95,9 +119,10 @@
     <script>
         let currentCategory = "all";
 
-        function setCategory(category, btnElement) {
+        function selectCategory(category, label, btnElement) {
             currentCategory = category;
-            document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+            document.getElementById("cat-btn-label").textContent = label;
+            document.querySelectorAll("#cat-filter-menu .dropdown-item").forEach(btn => btn.classList.remove("active"));
             btnElement.classList.add("active");
             applyFilters();
         }
