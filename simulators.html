@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симуляторы — Техно-Эксперт</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .sim-tabs { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.5rem 0; }
+        .sim-stage {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .svg-wrapper {
+            width: 100%;
+            max-width: 760px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+            user-select: none;
+        }
+        .svg-wrapper.nokia-wrap { max-width: 340px; box-shadow: none; }
+        .svg-wrapper svg { width: 100%; height: auto; display: block; }
+        .sim-controls {
+            margin-top: 1.25rem;
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .dos-input-bar {
+            width: 100%;
+            max-width: 760px;
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .dos-input-bar input {
+            flex: 1;
+            background: #0a0a0a;
+            color: #22c55e;
+            border: 1px solid #22c55e;
+            padding: 0.65rem 1rem;
+            font-family: Consolas, monospace;
+            font-size: 1rem;
+            border-radius: 8px;
+            outline: none;
+        }
+        .svg-btn { cursor: pointer; }
+        .svg-btn:hover { opacity: 0.85; }
+    </style>
+</head>
+<body>
+    <header id="site-header"></header>
+
+    <main>
+        <h1>🕹️ Интерактивные SVG-симуляторы</h1>
+        <p style="color: var(--text-muted);">Ретро-техника и классические операционные системы, воссозданные в векторной SVG-графике.</p>
+
+        <div class="sim-tabs">
+            <button class="filter-btn active" onclick="switchSim('nokia', this)">📱 Nokia 3310 (Змейка)</button>
+            <button class="filter-btn" onclick="switchSim('tv', this)">📺 Ретро-ТВ</button>
+            <button class="filter-btn" onclick="switchSim('xp', this)">🪟 Windows XP</button>
+            <button class="filter-btn" onclick="switchSim('dos', this)">📟 MS-DOS</button>
+        </div>
+
+        <!-- 1. NOKIA 3310 -->
+        <section id="sim-nokia" class="sim-stage">
+            <div class="svg-wrapper nokia-wrap">
+                <svg viewBox="0 0 340 660" xmlns="http://w3.org">
+                    <path d="M 65 20 Q 170 5 275 20 Q 320 40 315 180 L 305 540 Q 295 640 170 645 Q 45 640 35 540 L 25 180 Q 20 40 65 20 Z" fill="#1e293b" stroke="#0f172a" stroke-width="5"/>
+                    <path d="M 75 55 Q 170 42 265 55 Q 290 70 285 185 L 278 295 Q 170 315 62 295 L 55 185 Q 50 70 75 55 Z" fill="#cbd5e1" stroke="#94a3b8" stroke-width="3"/>
+                    <g fill="#334155">
+                        <circle cx="150" cy="72" r="3"/><circle cx="163" cy="70" r="3"/>
+                        <circle cx="177" cy="70" r="3"/><circle cx="190" cy="72" r="3"/>
+                    </g>
+                    <rect x="130" y="88" width="80" height="18" rx="3" fill="#1e293b"/>
+                    <text x="170" y="101" fill="#ffffff" font-family="sans-serif" font-size="11" font-weight="900" letter-spacing="2" text-anchor="middle">NOKIA</text>
+
+                    <!-- Экран LCD -->
+                    <rect x="75" y="118" width="190" height="145" rx="8" fill="#84a94c" stroke="#3f5222" stroke-width="4"/>
+                    <text id="nokia-score" x="85" y="134" fill="#1a240b" font-family="monospace" font-size="13" font-weight="bold">SCORE: 000</text>
+                    <g fill="#1a240b">
+                        <rect x="235" y="124" width="20" height="9" fill="none" stroke="#1a240b" stroke-width="1.5"/>
+                        <rect x="255" y="126" width="2" height="5"/><rect x="237" y="126" width="4" height="5"/>
+                        <rect x="243" y="126" width="4" height="5"/><rect x="249" y="126" width="4" height="5"/>
+                    </g>
+                    <line x1="80" y1="138" x2="260" y2="138" stroke="#1a240b" stroke-width="1.5"/>
+                    <rect x="80" y="142" width="180" height="110" fill="none" stroke="#1a240b" stroke-width="1"/>
+                    <g id="snake-board"></g>
+
+                    <g id="nokia-overlay">
+                        <rect x="92" y="170" width="156" height="54" rx="4" fill="#84a94c" stroke="#1a240b" stroke-width="2"/>
+                        <text id="nokia-msg-1" x="170" y="192" fill="#1a240b" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">SNAKE II</text>
+                        <text id="nokia-msg-2" x="170" y="212" fill="#1a240b" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">Нажмите старт</text>
+                    </g>
+
+                    <!-- Кнопки телефона -->
+                    <g class="svg-btn" onclick="startSnakeGame()">
+                        <path d="M 115 312 Q 170 322 225 312 L 218 338 Q 170 346 122 338 Z" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                        <rect x="152" y="322" width="36" height="5" rx="2" fill="#ffffff"/>
+                    </g>
+                    <g class="svg-btn" onclick="startSnakeGame()">
+                        <ellipse cx="82" cy="342" rx="26" ry="14" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
+                        <text x="82" y="347" fill="#0f172a" font-size="13" font-weight="bold" text-anchor="middle">C</text>
+                    </g>
+                    <g class="svg-btn" onclick="setSnakeDir(0, -1)">
+                        <ellipse cx="258" cy="342" rx="26" ry="14" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
+                        <text x="258" y="347" fill="#0f172a" font-size="13" font-weight="bold" text-anchor="middle">▲</text>
+                    </g>
+
+                    <!-- Клавиши 1-9, *, 0, # -->
+                    <g class="svg-btn" onclick="startSnakeGame()">
+                        <rect x="55" y="380" width="66" height="36" rx="14" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                        <text x="88" y="403" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">1</text>
+                    </g>
+                    <g class="svg-btn" onclick="setSnakeDir(0, -1)">
+                        <rect x="137" y="386" width="66" height="36" rx="14" fill="#cbd5e1" stroke="#3b82f6" stroke-width="2.5"/>
+                        <text x="170" y="409" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">2 ▲</text>
+                    </g>
+                    <g class="svg-btn" onclick="startSnakeGame()">
+                        <rect x="219" y="380" width="66" height="36" rx="14" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                        <text x="252" y="403" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">3</text>
+                    </g>
+
+                    <g class="svg-btn" onclick="setSnakeDir(-1, 0)">
+                        <rect x="55" y="432" width="66" height="36" rx="14" fill="#cbd5e1" stroke="#3b82f6" stroke-width="2.5"/>
+                        <text x="88" y="455" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">◀ 4</text>
+                    </g>
+                    <g class="svg-btn" onclick="startSnakeGame()">
+                        <rect x="137" y="438" width="66" height="36" rx="14" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                        <text x="170" y="461" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">5</text>
+                    </g>
+                    <g class="svg-btn" onclick="setSnakeDir(1, 0)">
+                        <rect x="219" y="432" width="66" height="36" rx="14" fill="#cbd5e1" stroke="#3b82f6" stroke-width="2.5"/>
+                        <text x="252" y="455" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">6 ▶</text>
+                    </g>
+
+                    <rect x="55" y="484" width="66" height="36" rx="14" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                    <text x="88" y="507" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">7</text>
+
+                    <g class="svg-btn" onclick="setSnakeDir(0, 1)">
+                        <rect x="137" y="490" width="66" height="36" rx="14" fill="#cbd5e1" stroke="#3b82f6" stroke-width="2.5"/>
+                        <text x="170" y="513" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">8 ▼</text>
+                    </g>
+
+                    <rect x="219" y="484" width="66" height="36" rx="14" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                    <text x="252" y="507" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">9</text>
+
+                    <rect x="55" y="536" width="66" height="36" rx="14" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                    <text x="88" y="560" fill="#0f172a" font-size="16" font-weight="bold" text-anchor="middle">*</text>
+                    <rect x="137" y="542" width="66" height="36" rx="14" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                    <text x="170" y="565" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">0</text>
+                    <rect x="219" y="536" width="66" height="36" rx="14" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                    <text x="252" y="559" fill="#0f172a" font-size="15" font-weight="bold" text-anchor="middle">#</text>
+                </svg>
+            </div>
+            <div class="sim-controls">
+                <button class="btn" onclick="startSnakeGame()">▶️ Старт / Заново</button>
+                <span style="color: var(--text-muted); font-size: 0.9rem;">Управление: кнопки <b>2, 4, 6, 8</b> или <b>стрелки</b> клавиатуры</span>
+            </div>
+        </section>
+
+        <!-- 2. РЕТРО-ТВ -->
+        <section id="sim-tv" class="sim-stage" style="display: none;">
+            <div class="svg-wrapper">
+                <svg viewBox="0 0 800 540" xmlns="http://w3.org">
+                    <defs>
+                        <radialGradient id="crtGlow" cx="50%" cy="50%" r="60%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+                            <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+                        </radialGradient>
+                        <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+                            <rect width="4" height="2" fill="#000" fill-opacity="0.22"/>
+                        </pattern>
+                        <clipPath id="screenClip"><rect x="95" y="135" width="490" height="330" rx="28"/></clipPath>
+                    </defs>
+                    <line x1="360" y1="100" x2="230" y2="15" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+                    <circle cx="230" cy="15" r="7" fill="#94a3b8"/>
+                    <line x1="410" y1="100" x2="540" y2="20" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+                    <circle cx="540" cy="20" r="7" fill="#94a3b8"/>
+                    <path d="M 330 100 Q 385 75 440 100 Z" fill="#334155"/>
+                    <rect x="60" y="100" width="680" height="400" rx="36" fill="#334155" stroke="#1e293b" stroke-width="6"/>
+                    <rect x="75" y="115" width="650" height="370" rx="28" fill="#475569"/>
+                    <rect x="88" y="128" width="504" height="344" rx="32" fill="#0f172a"/>
+                    <g clip-path="url(#screenClip)">
+                        <rect id="tv-bg" x="95" y="135" width="490" height="330" fill="#090d16"/>
+                        <g id="tv-channel-content"></g>
+                        <rect x="95" y="135" width="490" height="330" fill="url(#scanlines)" pointer-events="none"/>
+                        <rect x="95" y="135" width="490" height="330" fill="url(#crtGlow)" pointer-events="none"/>
+                        <g id="tv-osd">
+                            <text id="tv-ch-label" x="555" y="175" fill="#22c55e" font-family="monospace" font-size="26" font-weight="bold" text-anchor="end">CH 01</text>
+                            <text id="tv-vol-label" x="125" y="440" fill="#22c55e" font-family="monospace" font-size="20" font-weight="bold">VOL ||||||----</text>
+                        </g>
+                    </g>
+                    <rect x="605" y="135" width="105" height="330" rx="14" fill="#1e293b"/>
+                    <g fill="#0f172a">
+                        <rect x="620" y="155" width="75" height="6" rx="3"/><rect x="620" y="168" width="75" height="6" rx="3"/>
+                        <rect x="620" y="181" width="75" height="6" rx="3"/><rect x="620" y="194" width="75" height="6" rx="3"/>
+                    </g>
+                    <g class="svg-btn" onclick="tvChangeChannel(1)">
+                        <rect x="622" y="240" width="70" height="34" rx="8" fill="#3b82f6"/>
+                        <text x="657" y="262" fill="white" font-size="14" font-weight="bold" text-anchor="middle">CH +</text>
+                    </g>
+                    <g class="svg-btn" onclick="tvChangeChannel(-1)">
+                        <rect x="622" y="282" width="70" height="34" rx="8" fill="#3b82f6"/>
+                        <text x="657" y="304" fill="white" font-size="14" font-weight="bold" text-anchor="middle">CH -</text>
+                    </g>
+                    <g class="svg-btn" onclick="tvChangeVolume(1)">
+                        <rect x="622" y="328" width="32" height="30" rx="6" fill="#64748b"/>
+                        <text x="638" y="348" fill="white" font-size="14" font-weight="bold" text-anchor="middle">V+</text>
+                    </g>
+                    <g class="svg-btn" onclick="tvChangeVolume(-1)">
+                        <rect x="660" y="328" width="32" height="30" rx="6" fill="#64748b"/>
+                        <text x="676" y="348" fill="white" font-size="14" font-weight="bold" text-anchor="middle">V-</text>
+                    </g>
+                    <circle id="tv-led" cx="657" cy="382" r="5" fill="#22c55e"/>
+                    <g class="svg-btn" onclick="tvTogglePower()">
+                        <rect x="622" y="400" width="70" height="44" rx="10" fill="#ef4444"/>
+                        <text x="657" y="427" fill="white" font-size="13" font-weight="bold" text-anchor="middle">POWER</text>
+                    </g>
+                    <rect x="140" y="500" width="60" height="20" rx="6" fill="#1e293b"/>
+                    <rect x="600" y="500" width="60" height="20" rx="6" fill="#1e293b"/>
+                </svg>
+            </div>
+            <div class="sim-controls">
+                <button class="btn" onclick="tvTogglePower()">⏻ Вкл / Выкл</button>
+                <button class="btn btn-outline" onclick="tvChangeChannel(1)">📺 Следующий канал</button>
+                <button class="btn btn-outline" onclick="tvChangeVolume(1)">🔊 Громкость +</button>
+            </div>
+        </section>
+
+        <!-- 3. WINDOWS XP -->
+        <section id="sim-xp" class="sim-stage" style="display: none;">
+            <div class="svg-wrapper">
+                <svg viewBox="0 0 800 500" xmlns="http://w3.org">
+                    <defs>
+                        <linearGradient id="xpSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e62d0"/><stop offset="100%" stop-color="#68a8f8"/></linearGradient>
+                        <linearGradient id="xpHillBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#48a828"/><stop offset="100%" stop-color="#2b7514"/></linearGradient>
+                        <linearGradient id="xpHillFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#68c938"/><stop offset="100%" stop-color="#3a911d"/></linearGradient>
+                        <linearGradient id="xpTaskbar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3168d5"/><stop offset="100%" stop-color="#1f4eb3"/></linearGradient>
+                        <linearGradient id="xpStartBtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#52b848"/><stop offset="100%" stop-color="#287a20"/></linearGradient>
+                        <linearGradient id="xpWinTitle" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0997ff"/><stop offset="100%" stop-color="#0053ee"/></linearGradient>
+                    </defs>
+                    <rect width="800" height="464" fill="url(#xpSky)"/>
+                    <g fill="#ffffff" opacity="0.85">
+                        <ellipse cx="180" cy="95" rx="70" ry="22"/><ellipse cx="220" cy="85" rx="50" ry="20"/><ellipse cx="580" cy="110" rx="85" ry="24"/>
+                    </g>
+                    <path d="M 0 310 Q 320 220 800 320 L 800 464 L 0 464 Z" fill="url(#xpHillBack)"/>
+                    <path d="M -50 370 Q 450 250 850 390 L 850 464 L -50 464 Z" fill="url(#xpHillFront)"/>
+
+                    <g class="svg-btn" onclick="xpOpenWindow('mycomp')">
+                        <rect x="28" y="25" width="44" height="34" rx="4" fill="#cbd5e1" stroke="#1e293b" stroke-width="2"/>
+                        <rect x="33" y="30" width="34" height="22" fill="#38bdf8"/>
+                        <rect x="22" y="61" width="56" height="8" rx="2" fill="#94a3b8"/>
+                        <text x="50" y="84" fill="white" font-size="12" font-weight="bold" text-anchor="middle" style="text-shadow: 1px 1px 2px #000;">Мой компьютер</text>
+                    </g>
+                    <g class="svg-btn" onclick="xpOpenWindow('docs')">
+                        <path d="M 30 120 L 45 120 L 50 126 L 72 126 L 72 156 L 30 156 Z" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+                        <text x="50" y="174" fill="white" font-size="12" font-weight="bold" text-anchor="middle" style="text-shadow: 1px 1px 2px #000;">Техно-Гид.txt</text>
+                    </g>
+                    <g class="svg-btn" onclick="xpOpenWindow('trash')">
+                        <polygon points="34,210 66,210 62,250 38,250" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+                        <text x="50" y="268" fill="white" font-size="12" font-weight="bold" text-anchor="middle" style="text-shadow: 1px 1px 2px #000;">Корзина</text>
+                    </g>
+
+                    <g id="xp-window" transform="translate(180, 65)">
+                        <rect x="4" y="4" width="460" height="300" rx="8" fill="rgba(0,0,0,0.35)"/>
+                        <rect width="460" height="300" rx="8" fill="#ece9d8" stroke="#0053ee" stroke-width="3"/>
+                        <path d="M 0 8 Q 0 0 8 0 L 452 0 Q 460 0 460 8 L 460 32 L 0 32 Z" fill="url(#xpWinTitle)"/>
+                        <text id="xp-win-title" x="14" y="21" fill="white" font-size="14" font-weight="bold">Мой компьютер</text>
+                        <g class="svg-btn" onclick="xpCloseWindow()">
+                            <rect x="430" y="5" width="22" height="22" rx="4" fill="#e0433e" stroke="white" stroke-width="1.5"/>
+                            <text x="441" y="21" fill="white" font-size="14" font-weight="bold" text-anchor="middle">✕</text>
+                        </g>
+                        <rect x="8" y="38" width="444" height="252" fill="#ffffff" stroke="#aca899"/>
+                        <g id="xp-win-body"></g>
+                    </g>
+
+                    <g id="xp-start-menu" style="display: none;" transform="translate(0, 214)">
+                        <rect width="240" height="250" rx="6" fill="#ffffff" stroke="#0053ee" stroke-width="2"/>
+                        <rect width="240" height="44" fill="url(#xpWinTitle)"/>
+                        <circle cx="24" cy="22" r="14" fill="#facc15" stroke="white" stroke-width="2"/>
+                        <text x="48" y="27" fill="white" font-size="15" font-weight="bold">Техно-Эксперт</text>
+                        <g class="svg-btn" onclick="xpOpenWindow('mycomp'); xpToggleStart();">
+                            <rect x="8" y="54" width="224" height="34" rx="4" fill="#eff6ff"/>
+                            <text x="20" y="76" fill="#1e293b" font-size="14" font-weight="bold">💻 Мой компьютер</text>
+                        </g>
+                        <g class="svg-btn" onclick="xpOpenWindow('docs'); xpToggleStart();">
+                            <rect x="8" y="96" width="224" height="34" rx="4" fill="#eff6ff"/>
+                            <text x="20" y="118" fill="#1e293b" font-size="14" font-weight="bold">📄 Техно-Гид.txt</text>
+                        </g>
+                        <g class="svg-btn" onclick="xpOpenWindow('error'); xpToggleStart();">
+                            <rect x="8" y="138" width="224" height="34" rx="4" fill="#fef2f2"/>
+                            <text x="20" y="160" fill="#dc2626" font-size="14" font-weight="bold">⚠️ Вызвать ошибку XP</text>
+                        </g>
+                    </g>
+
+                    <rect y="464" width="800" height="36" fill="url(#xpTaskbar)"/>
+                    <g class="svg-btn" onclick="xpToggleStart()">
+                        <path d="M 0 464 L 105 464 Q 118 482 105 500 L 0 500 Z" fill="url(#xpStartBtn)"/>
+                        <text x="52" y="488" fill="white" font-size="17" font-weight="bold" font-style="italic" text-anchor="middle">⊞ пуск</text>
+                    </g>
+                    <rect x="705" y="464" width="95" height="36" fill="#1290e8"/>
+                    <text id="xp-clock" x="752" y="487" fill="white" font-size="14" font-weight="bold" text-anchor="middle">12:00</text>
+                </svg>
+            </div>
+            <div class="sim-controls">
+                <button class="btn" onclick="xpToggleStart()">⊞ Открыть Пуск</button>
+                <button class="btn btn-outline" onclick="xpOpenWindow('mycomp')">💻 Мой компьютер</button>
+                <button class="btn btn-outline" onclick="xpOpenWindow('error')">⚠️ Ошибка Windows</button>
+            </div>
+        </section>
+
+        <!-- 4. MS-DOS -->
+        <section id="sim-dos" class="sim-stage" style="display: none;">
+            <div class="svg-wrapper">
+                <svg viewBox="0 0 800 460" xmlns="http://w3.org">
+                    <defs>
+                        <pattern id="dosGrid" width="3" height="3" patternUnits="userSpaceOnUse">
+                            <rect width="3" height="1" fill="#000" fill-opacity="0.35"/>
+                        </pattern>
+                    </defs>
+                    <rect width="800" height="460" rx="20" fill="#d6d3c9" stroke="#a8a29e" stroke-width="4"/>
+                    <rect x="28" y="24" width="744" height="390" rx="16" fill="#1c1917"/>
+                    <rect x="42" y="38" width="716" height="362" rx="10" fill="#050805"/>
+                    <g id="dos-lines" font-family="Consolas, monospace" font-size="18" fill="#22c55e"></g>
+                    <rect x="42" y="38" width="716" height="362" rx="10" fill="url(#dosGrid)" pointer-events="none"/>
+                    <circle cx="715" cy="436" r="5" fill="#22c55e"/>
+                    <text x="698" y="441" fill="#57534e" font-size="12" font-weight="bold" text-anchor="end">TURBO / HDD</text>
+                </svg>
+            </div>
+            <div class="dos-input-bar">
+                <input type="text" id="dos-cmd" placeholder="Введите команду (help, dir, ver, matrix, cls) и нажмите Enter..." onkeydown="if(event.key==='Enter') runDosCommand()">
+                <button class="btn" onclick="runDosCommand()">Enter ↵</button>
+            </div>
+            <div class="sim-controls">
+                <button class="btn btn-outline" onclick="quickDos('help')">help</button>
+                <button class="btn btn-outline" onclick="quickDos('dir')">dir</button>
+                <button class="btn btn-outline" onclick="quickDos('ver')">ver</button>
+                <button class="btn btn-outline" onclick="quickDos('matrix')">matrix</button>
+                <button class="btn btn-outline" onclick="quickDos('cls')">cls</button>
+            </div>
+        </section>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="data.js"></script>
+    <script src="simulators.js"></script>
+</body>
+</html>
