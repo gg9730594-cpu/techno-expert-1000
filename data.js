@@ -4,6 +4,7 @@ const MENU_ITEMS = [
     { title: "Телевизоры", url: "tv.html" },
     { title: "Компьютеры", url: "pc.html" },
     { title: "Смартфоны", url: "phones.html" },
+    { title: "Тренажер печати", url: "typing.html" },
     { title: "Решение проблем", url: "troubleshooting.html" }
 ];
 
