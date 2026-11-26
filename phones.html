@@ -1,25 +1,23 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Смартфоны — Техно-Эксперт</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <header id="site-header"></header>
 
     <main>
         <h1>📱 Смартфоны и гаджеты</h1>
-        <p style="color: var(--text-muted);">Настройка экранов, продление жизни аккумулятора и полезные расчеты.</p>
+        <p style="color: var(--text-muted);">Настройка экранов, продление жизни аккумулятора и выбор памяти.</p>
 
+        <!-- ИНСТРУМЕНТ 1: Калькулятор времени зарядки -->
         <section class="tool-box">
             <h2>⚡ Калькулятор времени зарядки смартфона</h2>
-            <p style="margin-bottom: 1rem; color: var(--text-muted);">Рассчитайте примерное время зарядки с 0% до 100% с
-                учетом замедления после 80%.</p>
-
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">Рассчитайте примерное время зарядки с 0% до 100% с учетом замедления после 80%.</p>
+            
             <div class="form-group">
                 <label for="battery-mah">Емкость аккумулятора (мА·ч):</label>
                 <input type="number" id="battery-mah" value="5000" min="1000" max="20000" step="100">
@@ -37,6 +35,28 @@
             <button class="btn" onclick="calculateChargeTime()">Рассчитать время</button>
 
             <div id="charge-result" class="result-box"></div>
+        </section>
+
+        <!-- ИНСТРУМЕНТ 2: Калькулятор памяти -->
+        <section class="tool-box">
+            <h2>💾 Сколько памяти нужно в смартфоне?</h2>
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">Укажите, сколько контента вы планируете хранить на устройстве.</p>
+            
+            <div class="form-group">
+                <label for="mem-photos">Количество фотографий (тыс. штук):</label>
+                <input type="number" id="mem-photos" value="5" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label for="mem-video">4K-видео (часов):</label>
+                <input type="number" id="mem-video" value="2" min="0" max="50">
+            </div>
+            <div class="form-group">
+                <label for="mem-games">Тяжелые игры (штук):</label>
+                <input type="number" id="mem-games" value="2" min="0" max="20">
+            </div>
+            <button class="btn" onclick="calculateStorage()">Подобрать объем</button>
+
+            <div id="storage-result" class="result-box"></div>
         </section>
 
         <h2>Статьи о смартфонах</h2>
@@ -73,7 +93,27 @@
                 <span style="font-size: 0.9rem;">До 80% смартфон зарядится примерно за <b>${Math.round(totalMinutes * 0.65)} мин</b>.</span>
             `;
         }
+
+        function calculateStorage() {
+            const photosK = parseFloat(document.getElementById("mem-photos").value) || 0;
+            const videoHrs = parseFloat(document.getElementById("mem-video").value) || 0;
+            const games = parseFloat(document.getElementById("mem-games").value) || 0;
+
+            // Система + мессенджеры (~35 ГБ) + фото (~3.5 ГБ за 1000 шт) + 4K видео (~22 ГБ/час) + игры (~12 ГБ/шт)
+            const totalGb = Math.round(35 + (photosK * 3.5) + (videoHrs * 22) + (games * 12));
+
+            let rec = "128 ГБ";
+            if (totalGb > 105) rec = "256 ГБ";
+            if (totalGb > 220) rec = "512 ГБ";
+            if (totalGb > 450) rec = "1 ТБ";
+
+            const resultBox = document.getElementById("storage-result");
+            resultBox.style.display = "block";
+            resultBox.innerHTML = `
+                Примерный вес ваших данных (с учетом системы и мессенджеров): <b>~${totalGb} ГБ</b>.<br>
+                <strong>Рекомендуемый объем памяти:</strong> <b>${rec}</b>.
+            `;
+        }
     </script>
 </body>
-
 </html>
