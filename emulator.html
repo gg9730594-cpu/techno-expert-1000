@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эмулятор 8-битного процессора — Техно-Эксперт</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .emu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        @media (max-width: 850px) {
+            .emu-grid { grid-template-columns: 1fr; }
+        }
+        .panel-box {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+        .registers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        .reg-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+            font-family: Consolas, monospace;
+        }
+        .reg-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .ram-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Consolas, monospace;
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+        }
+        .ram-table th, .ram-table td {
+            border: 1px solid var(--border);
+            padding: 0.45rem 0.6rem;
+            text-align: left;
+        }
+        .ram-row.active-pc {
+            background: rgba(37, 99, 235, 0.2);
+            outline: 2px solid var(--primary);
+            font-weight: bold;
+        }
+        .ram-input {
+            width: 65px;
+            padding: 0.2rem 0.4rem;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .leds-bar {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #0f172a;
+            border-radius: 10px;
+        }
+        .led {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #1e293b;
+            border: 2px solid #334155;
+            transition: all 0.15s;
+        }
+        .led.on {
+            background: #ef4444;
+            box-shadow: 0 0 12px #ef4444;
+            border-color: #fca5a5;
+        }
+        .seven-seg {
+            background: #090d16;
+            color: #22c55e;
+            font-family: Consolas, monospace;
+            font-size: 2.6rem;
+            font-weight: 800;
+            text-align: center;
+            padding: 0.75rem;
+            border-radius: 10px;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <header id="site-header"></header>
+
+    <main>
+        <h1>🧠 Эмулятор 8-битного процессора (SAP-1)</h1>
+        <p style="color: var(--text-muted);">Настоящий потактовый эмулятор простейшего компьютера: 16 байт оперативной памяти, регистры процессора, светодиоды и цифровой дисплей.</p>
+
+        <!-- Готовые программы (Пресеты) -->
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.25rem;">
+            <button class="filter-btn active" onclick="loadPreset('counter', this)">🔄 Бесконечный счетчик (+1)</button>
+            <button class="filter-btn" onclick="loadPreset('add', this)">➕ Сложение (15 + 27)</button>
+            <button class="filter-btn" onclick="loadPreset('blink', this)">💡 Бегущие огни (Биты)</button>
+        </div>
+
+        <div class="emu-grid">
+            <!-- Левая панель: Процессор и устройства вывода -->
+            <div class="panel-box">
+                <h3>⚙️ Регистры процессора (CPU)</h3>
+                <div class="registers">
+                    <div class="reg-card">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">PC (Адрес)</div>
+                        <div class="reg-val" id="reg-pc">0</div>
+                    </div>
+                    <div class="reg-card">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">ACC (Аккумулятор)</div>
+                        <div class="reg-val" id="reg-acc">0</div>
+                    </div>
+                    <div class="reg-card">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">IR (Команда)</div>
+                        <div class="reg-val" id="reg-ir">NOP</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+                    <button class="btn" onclick="cpuStep()">⏭️ 1 Такт (Шаг)</button>
+                    <button class="btn btn-outline" id="run-btn" onclick="toggleRun()">▶️ Автозапуск</button>
+                    <button class="btn btn-outline" onclick="resetCpu()">🔄 Сброс</button>
+                </div>
+
+                <h3>📟 Порт вывода (OUT)</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Цифровой дисплей (десятичное значение):</p>
+                <div class="seven-seg" id="out-display">000</div>
+
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;">8-битная шина светодиодов (двоичный код):</p>
+                <div class="leds-bar" id="leds-container"></div>
+
+                <div id="cpu-status" style="font-family: monospace; font-size: 0.88rem; color: var(--primary); margin-top: 0.5rem;">
+                    Готов к работе. Нажмите «1 Такт» или «Автозапуск».
+                </div>
+            </div>
+
+            <!-- Правая панель: Оперативная память (ОЗУ 16 байт) -->
+            <div class="panel-box">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>💾 Оперативная память (ОЗУ: 16 байт)</h3>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Можно редактировать</span>
+                </div>
+
+                <table class="ram-table">
+                    <thead>
+                        <tr>
+                            <th>Адрес</th>
+                            <th>Байт (Hex)</th>
+                            <th>Расшифровка (Ассемблер)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ram-body"></tbody>
+                </table>
+
+                <div style="margin-top: 1rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+                    <strong>Система команд процессора (Старшая цифра = код, младшая = адрес):</strong><br>
+                    <code>1X</code> — <b>LDA X</b> (Загрузить число из ячейки X в ACC)<br>
+                    <code>2X</code> — <b>ADD X</b> (Прибавить число из ячейки X к ACC)<br>
+                    <code>3X</code> — <b>SUB X</b> (Вычесть число из ячейки X)<br>
+                    <code>4X</code> — <b>STA X</b> (Сохранить ACC в ячейку X)<br>
+                    <code>6X</code> — <b>JMP X</b> (Перейти к выполнению ячейки X)<br>
+                    <code>E0</code> — <b>OUT</b> (Вывести ACC на дисплей и светодиоды)<br>
+                    <code>F0</code> — <b>HLT</b> (Остановить процессор)
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="data.js"></script>
+    <script src="emulator.js"></script>
+</body>
+</html>
