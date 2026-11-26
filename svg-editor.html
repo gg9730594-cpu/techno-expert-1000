@@ -10,9 +10,9 @@
             display: grid;
             grid-template-columns: 1.15fr 1fr;
             gap: 1.5rem;
-            margin-top: 1.5rem;
+            margin-top: 1.25rem;
         }
-        @media (max-width: 900px) {
+        @media (max-width: 920px) {
             .builder-layout { grid-template-columns: 1fr; }
         }
         .toolbar {
@@ -48,7 +48,6 @@
         #gui-svg {
             width: 100%;
             aspect-ratio: 4 / 3;
-            background: #e2e8f0;
             border-radius: 8px;
             cursor: default;
             user-select: none;
@@ -56,7 +55,7 @@
         }
         .props-bar {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.6rem;
             flex-wrap: wrap;
             align-items: center;
             margin-top: 0.85rem;
@@ -64,13 +63,39 @@
             border-top: 1px solid var(--border);
             font-size: 0.9rem;
         }
-        .props-bar input {
-            padding: 0.35rem 0.6rem;
+        .props-bar input, .logic-box select, .logic-box input {
+            padding: 0.4rem 0.6rem;
             border: 1px solid var(--border);
             border-radius: 6px;
             background: var(--bg);
             color: var(--text);
+            font-size: 0.88rem;
         }
+        .logic-box {
+            margin-top: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+        .logic-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 0.6rem;
+            font-size: 0.88rem;
+        }
+        .logic-badge {
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 5px;
+            font-size: 0.78rem;
+        }
+        .logic-badge.else { background: #ef4444; }
+        .logic-badge.then { background: #22c55e; }
         .code-panel {
             background: var(--surface);
             border: 2px solid var(--border);
@@ -90,11 +115,11 @@
         #code-output {
             width: 100%;
             flex: 1;
-            min-height: 360px;
+            min-height: 440px;
             background: #090d16;
             color: #38bdf8;
             font-family: "JetBrains Mono", Consolas, monospace;
-            font-size: 0.85rem;
+            font-size: 0.84rem;
             line-height: 1.5;
             padding: 1rem;
             border-radius: 8px;
@@ -109,69 +134,115 @@
 
     <main>
         <h1>🖥️ Визуальный конструктор GUI-программ</h1>
-        <p style="color: var(--text-muted);">Добавляйте кнопки, поля ввода и надписи в макет окна, перетаскивайте их мышкой, а браузер сгенерирует готовый код десктопной программы.</p>
+        <p style="color: var(--text-muted);">Соберите интерфейс, выберите тему окна и задайте алгоритм <b>ЕСЛИ — ТОГДА — ИНАЧЕ</b> для генерации рабочей программы.</p>
 
-        <!-- Панель добавления виджетов -->
+        <!-- Панель виджетов и тем -->
         <div class="toolbar">
-            <span style="font-weight: 600; font-size: 0.9rem;">Добавить виджет:</span>
-            <button class="tool-btn" onclick="addWidget('button')">🔘 Кнопка (Button)</button>
-            <button class="tool-btn" onclick="addWidget('input')">📝 Поле ввода (Input)</button>
-            <button class="tool-btn" onclick="addWidget('label')">🔤 Надпись (Label)</button>
-            <button class="tool-btn" onclick="addWidget('checkbox')">☑️ Флажок (CheckBox)</button>
+            <button class="tool-btn" onclick="addWidget('button')">🔘 Кнопка</button>
+            <button class="tool-btn" onclick="addWidget('input')">📝 Поле ввода</button>
+            <button class="tool-btn" onclick="addWidget('label')">🔤 Надпись</button>
+            <button class="tool-btn" onclick="addWidget('checkbox')">☑️ Флажок</button>
 
-            <div style="margin-left: auto; display: flex; gap: 0.4rem;">
-                <button class="tool-btn" onclick="deleteSelected()" style="color: #ef4444;">🗑️ Удалить выбранный</button>
+            <div style="margin-left: auto; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Тема окна:</span>
+                <select id="win-theme" onchange="renderDesigner()" style="padding: 0.4rem 0.6rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: 500;">
+                    <option value="modern">🪟 Современная (Win 11)</option>
+                    <option value="win95">📟 Ретро Windows 95 / 98</option>
+                    <option value="dos">💾 Ретро MS-DOS (BGI)</option>
+                    <option value="dark">🌙 Темная (Dark Studio)</option>
+                </select>
+                <button class="tool-btn" onclick="deleteSelected()" style="color: #ef4444;">🗑️ Удалить</button>
             </div>
         </div>
 
         <div class="builder-layout">
-            <!-- Левая часть: SVG-макет окна программы -->
+            <!-- Левая часть: SVG-макет и логика -->
             <div class="canvas-box">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; font-size: 0.85rem; color: var(--text-muted);">
-                    <span>Заголовок окна: <input type="text" id="win-title" value="Моя программа" oninput="renderDesigner()" style="padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text);"></span>
+                    <span>Заголовок: <input type="text" id="win-title" value="Проверка доступа" oninput="renderDesigner()" style="padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text);"></span>
                     <span>400 × 300 px</span>
                 </div>
 
                 <svg id="gui-svg" viewBox="0 0 400 300" xmlns="http://w3.org">
                     <defs>
                         <pattern id="winGrid" width="10" height="10" patternUnits="userSpaceOnUse">
-                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#cbd5e1" stroke-width="0.6"/>
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(100,116,139,0.22)" stroke-width="0.6"/>
                         </pattern>
                     </defs>
-
-                    <!-- Фон окна программы -->
-                    <rect width="400" height="300" fill="#f1f5f9"/>
+                    <rect id="svg-win-bg" width="400" height="300" fill="#f1f5f9"/>
                     <rect y="32" width="400" height="268" fill="url(#winGrid)"/>
-
-                    <!-- Системная шапка окна -->
-                    <rect width="400" height="32" fill="#1e293b"/>
-                    <text id="svg-win-title" x="12" y="21" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold">Моя программа</text>
-                    <g fill="#64748b">
-                        <rect x="325" y="8" width="16" height="16" rx="3"/>
-                        <rect x="347" y="8" width="16" height="16" rx="3"/>
+                    <rect id="svg-win-bar" width="400" height="32" fill="#1e293b"/>
+                    <text id="svg-win-title" x="12" y="21" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold">Проверка доступа</text>
+                    <g id="svg-win-controls">
+                        <rect x="325" y="8" width="16" height="16" rx="3" fill="#64748b"/>
+                        <rect x="347" y="8" width="16" height="16" rx="3" fill="#64748b"/>
                         <rect x="369" y="8" width="18" height="16" rx="3" fill="#ef4444"/>
                     </g>
-
-                    <!-- Слой с элементами интерфейса -->
                     <g id="widgets-layer"></g>
                 </svg>
 
                 <!-- Свойства выбранного элемента -->
-                <div class="props-bar" id="props-panel">
-                    <span>Текст элемента:</span>
-                    <input type="text" id="prop-text" oninput="updateSelectedText(this.value)" style="flex: 1; min-width: 140px;">
+                <div class="props-bar">
+                    <span>Текст:</span>
+                    <input type="text" id="prop-text" oninput="updateSelectedText(this.value)" style="flex: 1; min-width: 130px;">
                     <span id="prop-coords" style="color: var(--text-muted); font-family: monospace;">X: 0, Y: 0</span>
+                </div>
+
+                <!-- Блок алгоритма ЕСЛИ - ТОГДА - ИНАЧЕ -->
+                <div class="logic-box">
+                    <strong style="font-size: 0.92rem;">⚡ Алгоритм логики (ЕСЛИ → ТОГДА → ИНАЧЕ)</strong>
+                    <div class="logic-row">
+                        <span class="logic-badge">ЕСЛИ</span>
+                        <span>нажата</span>
+                        <select id="logic-trigger" onchange="saveLogic()"></select>
+                    </div>
+                    <div class="logic-row">
+                        <span class="logic-badge">И</span>
+                        <select id="logic-cond-type" onchange="saveLogic()">
+                            <option value="always">без доп. условий (всегда)</option>
+                            <option value="not_empty">поле ввода не пустое</option>
+                            <option value="equals">поле ввода равно тексту:</option>
+                            <option value="checked">флажок (CheckBox) отмечен</option>
+                        </select>
+                        <input type="text" id="logic-cond-val" value="1234" placeholder="Значение..." oninput="saveLogic()" style="width: 110px;">
+                    </div>
+                    <div class="logic-row">
+                        <span class="logic-badge then">ТОГДА</span>
+                        <select id="logic-then-act" onchange="saveLogic()">
+                            <option value="msgbox">Показать окно сообщения:</option>
+                            <option value="set_label">Изменить текст надписи (Label) на:</option>
+                            <option value="clear_input">Очистить поле ввода</option>
+                            <option value="exit">Закрыть программу</option>
+                        </select>
+                        <input type="text" id="logic-then-val" value="Доступ разрешен!" oninput="saveLogic()" style="flex: 1; min-width: 130px;">
+                    </div>
+                    <div class="logic-row" id="logic-else-row">
+                        <span class="logic-badge else">ИНАЧЕ</span>
+                        <span>показать ошибку:</span>
+                        <input type="text" id="logic-else-val" value="Ошибка! Проверьте ввод." oninput="saveLogic()" style="flex: 1; min-width: 130px;">
+                    </div>
                 </div>
             </div>
 
-            <!-- Правая часть: Готовый исходный код программы -->
+            <!-- Правая часть: Исходный код программы -->
             <div class="code-panel">
                 <div class="code-header">
                     <select id="lang-select" onchange="generateProgramCode()" style="padding: 0.45rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: 600;">
-                        <option value="cpp_win32">C++ (Win32 API — Нативное окно Windows)</option>
-                        <option value="cpp_imgui">C++ (Dear ImGui — Игровой/утилитарный GUI)</option>
-                        <option value="python_tk">Python (Tkinter — Оконное приложение)</option>
-                        <option value="csharp_wf">C# (Windows Forms)</option>
+                        <optgroup label="Десктоп (Windows / Linux / macOS)">
+                            <option value="cpp_win32">C++ (Win32 API — Windows .exe)</option>
+                            <option value="python_tk">Python (Tkinter)</option>
+                            <option value="python_qt">Python (PyQt6 — Linux / macOS)</option>
+                            <option value="csharp_wf">C# (Windows Forms)</option>
+                        </optgroup>
+                        <optgroup label="Ретро-системы (DOS / Win9x)">
+                            <option value="vb6">Visual Basic 6.0 (Форма .FRM)</option>
+                            <option value="pascal_dos">Turbo Pascal 7.0 (DOS Graph)</option>
+                            <option value="qbasic">QBasic / QuickBASIC (DOS)</option>
+                        </optgroup>
+                        <optgroup label="Игры и графика">
+                            <option value="cpp_imgui">C++ (Dear ImGui)</option>
+                            <option value="lua_love">Lua (LÖVE 2D)</option>
+                        </optgroup>
                     </select>
                     <button class="btn" id="copy-code-btn" onclick="copyGeneratedCode()">📋 Копировать</button>
                 </div>
