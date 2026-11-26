@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор GUI-программ — Техно-Эксперт</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .builder-layout {
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        @media (max-width: 900px) {
+            .builder-layout { grid-template-columns: 1fr; }
+        }
+        .toolbar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 1rem;
+            background: var(--surface);
+            padding: 0.85rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+        .tool-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.45rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.88rem;
+        }
+        .tool-btn:hover { border-color: var(--primary); }
+        .canvas-box {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        #gui-svg {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background: #e2e8f0;
+            border-radius: 8px;
+            cursor: default;
+            user-select: none;
+            border: 1px solid #94a3b8;
+        }
+        .props-bar {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 0.85rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .props-bar input {
+            padding: 0.35rem 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text);
+        }
+        .code-panel {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+        #code-output {
+            width: 100%;
+            flex: 1;
+            min-height: 360px;
+            background: #090d16;
+            color: #38bdf8;
+            font-family: "JetBrains Mono", Consolas, monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            resize: vertical;
+        }
+        .widget-item { cursor: move; }
+    </style>
+</head>
+<body>
+    <header id="site-header"></header>
+
+    <main>
+        <h1>🖥️ Визуальный конструктор GUI-программ</h1>
+        <p style="color: var(--text-muted);">Добавляйте кнопки, поля ввода и надписи в макет окна, перетаскивайте их мышкой, а браузер сгенерирует готовый код десктопной программы.</p>
+
+        <!-- Панель добавления виджетов -->
+        <div class="toolbar">
+            <span style="font-weight: 600; font-size: 0.9rem;">Добавить виджет:</span>
+            <button class="tool-btn" onclick="addWidget('button')">🔘 Кнопка (Button)</button>
+            <button class="tool-btn" onclick="addWidget('input')">📝 Поле ввода (Input)</button>
+            <button class="tool-btn" onclick="addWidget('label')">🔤 Надпись (Label)</button>
+            <button class="tool-btn" onclick="addWidget('checkbox')">☑️ Флажок (CheckBox)</button>
+
+            <div style="margin-left: auto; display: flex; gap: 0.4rem;">
+                <button class="tool-btn" onclick="deleteSelected()" style="color: #ef4444;">🗑️ Удалить выбранный</button>
+            </div>
+        </div>
+
+        <div class="builder-layout">
+            <!-- Левая часть: SVG-макет окна программы -->
+            <div class="canvas-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; font-size: 0.85rem; color: var(--text-muted);">
+                    <span>Заголовок окна: <input type="text" id="win-title" value="Моя программа" oninput="renderDesigner()" style="padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text);"></span>
+                    <span>400 × 300 px</span>
+                </div>
+
+                <svg id="gui-svg" viewBox="0 0 400 300" xmlns="http://w3.org">
+                    <defs>
+                        <pattern id="winGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#cbd5e1" stroke-width="0.6"/>
+                        </pattern>
+                    </defs>
+
+                    <!-- Фон окна программы -->
+                    <rect width="400" height="300" fill="#f1f5f9"/>
+                    <rect y="32" width="400" height="268" fill="url(#winGrid)"/>
+
+                    <!-- Системная шапка окна -->
+                    <rect width="400" height="32" fill="#1e293b"/>
+                    <text id="svg-win-title" x="12" y="21" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold">Моя программа</text>
+                    <g fill="#64748b">
+                        <rect x="325" y="8" width="16" height="16" rx="3"/>
+                        <rect x="347" y="8" width="16" height="16" rx="3"/>
+                        <rect x="369" y="8" width="18" height="16" rx="3" fill="#ef4444"/>
+                    </g>
+
+                    <!-- Слой с элементами интерфейса -->
+                    <g id="widgets-layer"></g>
+                </svg>
+
+                <!-- Свойства выбранного элемента -->
+                <div class="props-bar" id="props-panel">
+                    <span>Текст элемента:</span>
+                    <input type="text" id="prop-text" oninput="updateSelectedText(this.value)" style="flex: 1; min-width: 140px;">
+                    <span id="prop-coords" style="color: var(--text-muted); font-family: monospace;">X: 0, Y: 0</span>
+                </div>
+            </div>
+
+            <!-- Правая часть: Готовый исходный код программы -->
+            <div class="code-panel">
+                <div class="code-header">
+                    <select id="lang-select" onchange="generateProgramCode()" style="padding: 0.45rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: 600;">
+                        <option value="cpp_win32">C++ (Win32 API — Нативное окно Windows)</option>
+                        <option value="cpp_imgui">C++ (Dear ImGui — Игровой/утилитарный GUI)</option>
+                        <option value="python_tk">Python (Tkinter — Оконное приложение)</option>
+                        <option value="csharp_wf">C# (Windows Forms)</option>
+                    </select>
+                    <button class="btn" id="copy-code-btn" onclick="copyGeneratedCode()">📋 Копировать</button>
+                </div>
+                <textarea id="code-output" readonly spellcheck="false"></textarea>
+            </div>
+        </div>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="data.js"></script>
+    <script src="svg-editor.js"></script>
+</body>
+</html>
