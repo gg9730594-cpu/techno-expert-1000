@@ -1,25 +1,69 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Компьютеры — Техно-Эксперт</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        #pixel-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .pixel-hint {
+            background: rgba(0,0,0,0.65);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+    </style>
 </head>
-
 <body>
     <header id="site-header"></header>
 
     <main>
         <h1>💻 Компьютеры и комплектующие</h1>
-        <p style="color: var(--text-muted);">Сборка, апгрейд и обслуживание ПК.</p>
+        <p style="color: var(--text-muted);">Сборка, диагностика монитора, безопасность и обслуживание ПК.</p>
 
+        <!-- ИНСТРУМЕНТ 1: Тест битых пикселей -->
+        <section class="tool-box">
+            <h2>🖥️ Тест монитора на битые пиксели и засветы</h2>
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">Экран зальется сплошным цветом. Кликайте мышкой (или нажимайте пробел) для смены цветов: черный, белый, красный, зеленый, синий.</p>
+            <button class="btn" onclick="startPixelTest()">Запустить проверку экрана</button>
+        </section>
+
+        <!-- ИНСТРУМЕНТ 2: Генератор паролей -->
+        <section class="tool-box">
+            <h2>🔐 Генератор надежных паролей</h2>
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">Создайте стойкий пароль локально в браузере (никуда не передается).</p>
+            <div class="form-group">
+                <label for="pass-len">Длина пароля: <b id="len-label">16</b> символов</label>
+                <input type="range" id="pass-len" min="8" max="32" value="16" oninput="document.getElementById('len-label').textContent = this.value">
+            </div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <label><input type="checkbox" id="use-nums" checked> Цифры (0-9)</label>
+                <label><input type="checkbox" id="use-syms" checked> Спецсимволы (!@#$%)</label>
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                <input type="text" id="pass-output" class="search-input" style="max-width: 350px; padding: 0.6rem; font-family: monospace;" readonly>
+                <button class="btn" onclick="generatePassword()">Сгенерировать</button>
+                <button class="btn btn-outline" id="copy-pass-btn" onclick="copyPassword()">Копировать</button>
+            </div>
+        </section>
+
+        <!-- ИНСТРУМЕНТ 3: Калькулятор БП -->
         <section class="tool-box">
             <h2>🔌 Калькулятор блока питания (БП)</h2>
-            <p style="margin-bottom: 1rem; color: var(--text-muted);">Узнайте минимальную мощность БП с учетом запаса
-                30% для стабильной работы.</p>
-
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">Узнайте минимальную мощность БП с учетом запаса 30% для стабильной работы.</p>
+            
             <div class="form-group">
                 <label for="cpu-tdp">Уровень процессора:</label>
                 <select id="cpu-tdp">
@@ -46,28 +90,98 @@
         <div id="pc-articles" class="grid"></div>
     </main>
 
+    <!-- Полноэкранный слой для теста пикселей -->
+    <div id="pixel-screen" onclick="nextPixelColor()">
+        <div class="pixel-hint" id="pixel-hint">Кликните для смены цвета • ESC для выхода</div>
+    </div>
+
     <footer id="site-footer"></footer>
 
     <script src="data.js"></script>
     <script>
         renderArticles("pc-articles", "pc");
 
+        // Логика теста пикселей
+        const PIXEL_COLORS = ["#000000", "#ffffff", "#ff0000", "#00ff00", "#0000ff"];
+        let colorIndex = 0;
+
+        function startPixelTest() {
+            colorIndex = 0;
+            const screen = document.getElementById("pixel-screen");
+            screen.style.backgroundColor = PIXEL_COLORS[0];
+            screen.style.display = "flex";
+            document.getElementById("pixel-hint").style.display = "block";
+            setTimeout(() => { document.getElementById("pixel-hint").style.display = "none"; }, 2500);
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+        }
+
+        function nextPixelColor() {
+            colorIndex++;
+            if (colorIndex >= PIXEL_COLORS.length) {
+                stopPixelTest();
+                return;
+            }
+            document.getElementById("pixel-screen").style.backgroundColor = PIXEL_COLORS[colorIndex];
+        }
+
+        function stopPixelTest() {
+            document.getElementById("pixel-screen").style.display = "none";
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        document.addEventListener("keydown", (e) => {
+            const screen = document.getElementById("pixel-screen");
+            if (screen.style.display === "flex") {
+                if (e.key === "Escape") stopPixelTest();
+                if (e.key === " " || e.key === "ArrowRight") nextPixelColor();
+            }
+        });
+
+        // Логика генератора паролей
+        function generatePassword() {
+            const len = parseInt(document.getElementById("pass-len").value);
+            let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            if (document.getElementById("use-nums").checked) chars += "0123456789";
+            if (document.getElementById("use-syms").checked) chars += "!@#$%^&*()_+-=";
+
+            let pass = "";
+            const array = new Uint32Array(len);
+            window.crypto.getRandomValues(array);
+            for (let i = 0; i < len; i++) {
+                pass += chars[array[i] % chars.length];
+            }
+            document.getElementById("pass-output").value = pass;
+        }
+
+        function copyPassword() {
+            const val = document.getElementById("pass-output").value;
+            if (!val) return;
+            navigator.clipboard.writeText(val).then(() => {
+                const btn = document.getElementById("copy-pass-btn");
+                btn.textContent = "✅ Скопировано";
+                setTimeout(() => btn.textContent = "Копировать", 2000);
+            });
+        }
+        generatePassword();
+
+        // Логика калькулятора БП
         function calculatePSU() {
             const cpu = parseInt(document.getElementById("cpu-tdp").value);
             const gpu = parseInt(document.getElementById("gpu-tdp").value);
-            const systemBase = 70;
-
-            const totalLoad = cpu + gpu + systemBase;
+            const totalLoad = cpu + gpu + 70;
             const recommended = Math.ceil((totalLoad * 1.3) / 50) * 50;
 
             const resultBox = document.getElementById("psu-result");
             resultBox.style.display = "block";
             resultBox.innerHTML = `
                 Пиковое потребление системы: ~<b>${totalLoad} Вт</b>.<br>
-                <strong>Рекомендуемый блок питания:</strong> от <b>${recommended} Вт</b> (желательно с сертификатом 80+ Bronze или Gold).
+                <strong>Рекомендуемый блок питания:</strong> от <b>${recommended} Вт</b> (сертификат 80+ Bronze или Gold).
             `;
         }
     </script>
 </body>
-
 </html>
